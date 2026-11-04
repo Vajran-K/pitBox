@@ -5,7 +5,8 @@
  */
 import { pipeline, type AutomaticSpeechRecognitionPipeline } from "@huggingface/transformers";
 
-const MODEL = "onnx-community/whisper-base.en";
+// small.en: far fewer mistakes on noisy radio than base.en (about 250 MB, downloaded once, cached by the browser)
+const MODEL = "onnx-community/whisper-small.en";
 let asr: Promise<AutomaticSpeechRecognitionPipeline> | null = null;
 
 type In = { id: string; audio: Float32Array };
@@ -18,12 +19,12 @@ type Out =
 const post = (m: Out) => (self as unknown as Worker).postMessage(m);
 
 async function load(): Promise<AutomaticSpeechRecognitionPipeline> {
-  const gpu = "gpu" in navigator && !!(await (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu?.requestAdapter().catch(() => null));
-  const device = gpu ? "webgpu" : "wasm";
+  // 8-bit weights on WebAssembly: the smallest download that keeps the accuracy, and it runs on any browser
+  const device = "wasm";
   const files = new Map<string, { loaded: number; total: number }>();
   const p = (await pipeline("automatic-speech-recognition", MODEL, {
     device,
-    dtype: gpu ? { encoder_model: "fp32", decoder_model_merged: "q4" } : "q8",
+    dtype: "q8",
     progress_callback: (e: { status: string; file?: string; loaded?: number; total?: number }) => {
       if (e.status === "progress" && e.file) {
         files.set(e.file, { loaded: e.loaded ?? 0, total: e.total ?? 0 });
