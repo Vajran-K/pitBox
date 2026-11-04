@@ -1,0 +1,22 @@
+
+[1] Jolpica-F1
+  OK 247 ms, 1975 bytes
+  Oldest race: 1950 British Grand Prix - winner Nino Farina
+  Pit stops 2011 R1: available (1116 ms)
+  Lap times 1996 R1: available (351 ms)
+
+[2b] OpenF1 (historical, free; replaces the static archive)
+  OK 658 ms - latest finished race: United States 2026-10-25 (session 11396)
+    laps               56 rows        26 KB    775 ms
+    stints             54 rows         8 KB    658 ms
+    pit                32 rows         6 KB    627 ms
+    race_control      173 rows        44 KB   1008 ms
+    weather           159 rows        34 KB    776 ms
+    position          455 rows        51 KB    951 ms
+    car_data        34914 rows      5763 KB   5526 ms
+    location        35836 rows      4456 KB   4708 ms
+
+[2] F1 static live-timing archive
+  FAILED: HTTPError: HTTP Error 401: Unauthorized
+
+Done, with failures above.

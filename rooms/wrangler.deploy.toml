@@ -1,0 +1,26 @@
+# Deployment config (npm run deploy / deploy.bat). Same as wrangler.toml plus the AI model,
+# which only exists on Cloudflare: keeping it out of wrangler.toml lets local development run
+# without a Cloudflare login.
+name = "pitbox-rooms"
+main = "src/index.ts"
+compatibility_date = "2024-10-22"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[durable_objects.bindings]]
+name = "LIVE"
+class_name = "Live"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Live"]
+
+# Cloudflare Workers AI (free daily allowance) for "Ask PitBox" and race recaps
+[ai]
+binding = "AI"

@@ -1,0 +1,20 @@
+name = "pitbox-rooms"
+main = "src/index.ts"
+compatibility_date = "2024-10-22"
+
+# One Durable Object per watch room. SQLite-backed classes are available on the free plan.
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[durable_objects.bindings]]
+name = "LIVE"
+class_name = "Live"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Live"]

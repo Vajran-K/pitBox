@@ -1,0 +1,14 @@
+# race data: the exported site data is kept in the repo (the auto-update job builds on it);
+# downloads, logs and reports are not
+data/*
+!data/public/
+.cache/
+__pycache__/
+*.pyc
+.venv/
+spike/ff1_cache/
+spike/live_capture*.jsonl
+node_modules/
+deployed.txt
+.wrangler/
+dist/
