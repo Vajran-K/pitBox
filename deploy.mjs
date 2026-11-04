@@ -48,10 +48,13 @@ async function main() {
   step(4, "Website upload (Cloudflare Pages)");
   await run(`npx wrangler pages project create ${PAGES} --production-branch main`, ROOMS, {}, { allowFail: true }); // already exists: fine
   const pg = await run(`npx wrangler pages deploy "${join(WEB, "dist")}" --project-name ${PAGES} --branch main --commit-dirty=true`, ROOMS);
-  const site = pagesUrl(pg.out);
+  const upload = pagesUrl(pg.out);
+  // the upload's address is <hash>.<project address>; the site's permanent address drops the hash
+  // (the project address isn't always the project name: pitbox.pages.dev may belong to someone else)
+  const site = upload ? upload.replace(/^https:\/\/[0-9a-f]{6,}\./, "https://") : `https://${PAGES}.pages.dev`;
 
-  writeFileSync(join(ROOT, "deployed.txt"), `Website: https://${PAGES}.pages.dev (this upload: ${site ?? "see above"})\nRooms server: ${api}\nDeployed: ${new Date().toString()}\n`);
-  console.log(`\nDone.\n  Website:      https://${PAGES}.pages.dev   (this upload: ${site ?? "see above"})\n  Rooms server: ${api}\nSaved to deployed.txt. If ${PAGES}.pages.dev was taken, Cloudflare shows the real address under Workers & Pages.`);
+  writeFileSync(join(ROOT, "deployed.txt"), `Website: ${site}\nRooms server: ${api}\nThis upload: ${upload ?? "see the log"}\nDeployed: ${new Date().toString()}\n`);
+  console.log(`\nDone.\n  Website:      ${site}\n  Rooms server: ${api}\nSaved to deployed.txt.`);
 }
 
 if (!process.env.PITBOX_DEPLOY_TEST) {

@@ -62,7 +62,7 @@ From now on it runs by itself.
 - [ ] **Home**: shows the next race weekend in your timezone, and the last race's podium.
 - [ ] **Races → a race**: lap chart, strategy and replay load.
 - [ ] **Watch rooms**: start a replay room, open the invite link on your phone using mobile data, and chat both ways.
-- [ ] **Ask AI**: ask "who won?". The line under the chat says *Using Llama 3.1 8B on Cloudflare Workers AI*.
+- [ ] **Ask AI**: ask "who won?". The line under the chat says *Using a free AI model on Cloudflare Workers AI*.
 - [ ] **Schedule**: `https://pitbox-rooms.<subdomain>.workers.dev/api/schedule` lists this year's sessions.
 - [ ] **Live relay**: with the Live page open in another tab, `…workers.dev/api/live/state` shows `"upstream":"connected"`.
 - [ ] **Radio transcripts**: in a replay, turn on *Radio transcripts*. The first time downloads an 80 MB speech model.
@@ -82,7 +82,7 @@ Two things could only be tested from your laptop, not from Cloudflare's network:
 - **Failures:** GitHub emails you if a run fails. Open the run to see the error.
 
 ## Changing the code later
-Edit as usual, test with `dev.bat`, then in the pitbox folder run:
+Edit as usual, test with `dev.bat`, then double-click `push_changes.bat`, which does the following for you:
 ```
 git pull
 git add -A
@@ -90,6 +90,7 @@ git commit -m "what changed"
 git push
 ```
 The push deploys automatically. Run `git pull` first, because the bot adds race data commits.
+The schedule itself lives in `tools/github-update.yml`. `publish_to_github.bat` copies it to `.github/workflows/update.yml`. If you change the schedule, edit both copies, or run the .bat again.
 You no longer need `run_overnight.bat` or `deploy.bat`. `deploy.bat` still works for a manual deploy from your laptop.
 
 ## Free plan limits

@@ -72,8 +72,22 @@ async function route(request: Request, env: Env): Promise<Response> {
 }
 
 // ---- AI (Cloudflare Workers AI, free daily allowance) ---------------------------------
-const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// Tried in order; the first that answers is remembered. Cloudflare retires models from time to
+// time (llama-3.1-8b-instruct went in May 2026), so a retired or unsupported one just falls through.
+const AI_MODELS = [
+  { id: "@cf/meta/llama-3.1-8b-instruct-fp8", name: "Llama 3.1 8B" },
+  { id: "@cf/qwen/qwen3-30b-a3b-fp8", name: "Qwen3 30B" },
+  { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B" },
+  { id: "@cf/mistralai/mistral-small-3.1-24b-instruct", name: "Mistral Small 3.1" },
+];
+let working = 0; // index into AI_MODELS of the model that last worked
 const recent = new Map<string, number[]>(); // per-visitor request times, this instance only
+
+/** Model output, as text: unwraps objects, and drops reasoning blocks and ```json fences. */
+function asText(r: unknown): string {
+  if (r && typeof r === "object") return JSON.stringify(r);
+  return String(r ?? "").replace(/<think>[\s\S]*?<\/think>/g, "").replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, "").trim();
+}
 
 /**
  * The deployed site's language model. PitBox only ever asks it to turn a question into a small
@@ -81,7 +95,7 @@ const recent = new Map<string, number[]>(); // per-visitor request times, this i
  * to keep everyone inside the free allowance.
  */
 async function ai(request: Request, env: Env, action?: string): Promise<Response> {
-  if (!action) return json({ available: !!env.AI, model: env.AI ? "Llama 3.1 8B (Cloudflare Workers AI)" : null });
+  if (!action) return json({ available: !!env.AI, model: env.AI ? `${AI_MODELS[working].name} (Cloudflare Workers AI)` : null });
   if (action !== "chat" || request.method !== "POST") return json({ error: "Not found" }, 404);
   if (!env.AI) return json({ error: "The AI model isn't set up on this server." }, 503);
   const who = request.headers.get("CF-Connecting-IP") ?? "local";
@@ -97,17 +111,27 @@ async function ai(request: Request, env: Env, action?: string): Promise<Response
   if (!user) return json({ error: "Nothing to answer." }, 400);
   const temperature = Math.max(0, Math.min(1, Number(body.temperature ?? 0.1) || 0));
   const schema = body.schema && typeof body.schema === "object" ? body.schema : null;
-  try {
-    const out = await env.AI.run(AI_MODEL as never, {
-      messages: [{ role: "system", content: system }, { role: "user", content: user }],
-      temperature, max_tokens: 700,
-      ...(schema ? { response_format: { type: "json_schema", json_schema: schema } } : {}),
-    } as never) as { response?: unknown };
-    const r = out?.response;
-    return json({ content: typeof r === "string" ? r : JSON.stringify(r ?? "") });
-  } catch (e) {
-    return json({ error: `The AI model couldn't answer: ${(e as Error).message}` }, 502);
+  const errors: string[] = [];
+  for (let k = 0; k < AI_MODELS.length; k++) {
+    const i = (working + k) % AI_MODELS.length;
+    const m = AI_MODELS[i];
+    try {
+      const out = await env.AI.run(m.id as never, {
+        messages: [{ role: "system", content: system }, { role: "user", content: user }],
+        temperature, max_tokens: 700,
+        ...(schema ? { response_format: { type: "json_schema", json_schema: schema } } : {}),
+      } as never) as { response?: unknown; choices?: { message?: { content?: unknown } }[] };
+      const content = asText(out?.response ?? out?.choices?.[0]?.message?.content);
+      if (!content) throw new Error("empty answer");
+      if (schema) JSON.parse(content); // a model that ignored the schema counts as a failure
+      working = i;
+      return json({ content, model: m.name });
+    } catch (e) {
+      errors.push(`${m.id}: ${(e as Error).message.slice(0, 160)}`);
+    }
   }
+  console.log("ai: every model failed", errors);
+  return json({ error: `The AI model couldn't answer. ${errors[0] ?? ""}` }, 502);
 }
 
 /** Team radio clips live on F1's static host, which doesn't send CORS headers. Only those clips are passed through. */

@@ -63,7 +63,7 @@ export function ModelLine({ ai }: { ai: ModelState }) {
           onPick={(o) => { ai.setModel(o.key); setChanging(false); }} />
       ) : (
         isCloud(ai.model)
-          ? <p className="chart-note">Using <strong>Llama 3.1 8B</strong> on Cloudflare Workers AI. Every number still comes from PitBox's own calculations.</p>
+          ? <p className="chart-note">Using a free AI model on <strong>Cloudflare Workers AI</strong>. Every number still comes from PitBox's own calculations.</p>
           : <p className="chart-note">Using <strong>{ai.model}</strong> on this computer through Ollama. <button className="link-button" onClick={() => setChanging(true)}>Change model</button></p>
       )}
     </div>
