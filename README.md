@@ -1,7 +1,7 @@
 # PitBox
 
 F1 race data and 75 years of history, explored together. Personal project; free data only.
-
+https://pitbox-6he.pages.dev
 ```
 pipeline/   Python, standard library only: fetch + cache + export JSON  (see pipeline/README.md)
 web/        React + Vite frontend that reads data/public/
