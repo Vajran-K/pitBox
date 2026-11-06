@@ -6,7 +6,7 @@ import { ROOMS_BASE } from "./roomProtocol";
  *  - deployed: Cloudflare Workers AI through the rooms worker (free daily allowance).
  * Ollama is tried first; the cloud model is used when Ollama isn't there.
  */
-export const CLOUD_MODEL = "cloud:llama-3.1-8b";
+export const CLOUD_MODEL = "cloud:workers-ai"; // the rooms server picks the actual model
 export const isCloud = (model: string | null | undefined) => !!model?.startsWith("cloud:");
 // a deployed site has no /ollama proxy; asking would just fetch the app's own page
 const tryOllama = !import.meta.env.PROD || !!import.meta.env.VITE_OLLAMA;
