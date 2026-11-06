@@ -73,12 +73,14 @@ async function route(request: Request, env: Env): Promise<Response> {
 
 // ---- AI (Cloudflare Workers AI, free daily allowance) ---------------------------------
 // Tried in order; the first that answers is remembered. Cloudflare retires models from time to
-// time (llama-3.1-8b-instruct went in May 2026), so a retired or unsupported one just falls through.
+// time (llama-3.1-8b-instruct went in May 2026; llama-3.1-8b-instruct-fp8 and qwen3-30b-a3b-fp8
+// go on 20 Nov 2026), so a retired or unsupported one just falls through. Small models first:
+// they cost the fewest free-allowance neurons per question.
 const AI_MODELS = [
-  { id: "@cf/meta/llama-3.1-8b-instruct-fp8", name: "Llama 3.1 8B" },
-  { id: "@cf/qwen/qwen3-30b-a3b-fp8", name: "Qwen3 30B" },
-  { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B" },
+  { id: "@cf/google/gemma-4-26b-a4b-it", name: "Gemma 4 26B" },
+  { id: "@cf/qwen/qwen3.8-27b", name: "Qwen3.8 27B" },
   { id: "@cf/mistralai/mistral-small-3.1-24b-instruct", name: "Mistral Small 3.1" },
+  { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B" },
 ];
 let working = 0; // index into AI_MODELS of the model that last worked
 const recent = new Map<string, number[]>(); // per-visitor request times, this instance only
