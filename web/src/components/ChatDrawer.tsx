@@ -69,7 +69,7 @@ export default function ChatDrawer({ meta, timing, title, ai, open, onClose, tur
       <div className="chat-body" aria-live="polite">
         {turns.length === 0 && (
           <div className="chat-empty">
-            <p>Ask anything about this race: who won and who led, retirements, lap times, gaps, tyres, pit stops, sectors. Follow-ups work too ("now add Leclerc", "only laps 20 to 40").</p>
+            <p>Ask about this race (who won and who led, lap times, gaps, tyres, pit stops, sectors), or anything else in F1: other races, seasons, drivers' careers, records, rules. Follow-ups work too ("now add Leclerc", "and in 2010?").</p>
             <div className="chips">{examples.map((e) => <button key={e} className="chip" onClick={() => send(e)}>{e}</button>)}</div>
           </div>
         )}
@@ -81,7 +81,7 @@ export default function ChatDrawer({ meta, timing, title, ai, open, onClose, tur
       </div>
 
       <form className="chat-form" onSubmit={(e) => { e.preventDefault(); send(text); }}>
-        <input ref={input} value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask about this race…" aria-label="Message" />
+        <input ref={input} value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask about this race, or anything F1…" aria-label="Message" />
         <button className="button" disabled={busy || !text.trim()}>Send</button>
       </form>
       <div className="chat-foot"><ModelLine ai={ai} /></div>
@@ -95,6 +95,15 @@ function BotBubble({ turn, meta }: { turn: BotTurn; meta: Meta }) {
     <div className="bubble bot">
       <p>{turn.text}</p>
       {showChart && <div className="chat-answer"><AnswerView answer={turn.answer!} /></div>}
+      {turn.scope === "general" && (
+        <details className="chat-meta">
+          <summary>{turn.facts.length ? "From PitBox's history data" : "General F1 knowledge"} · {turn.via}</summary>
+          {turn.facts.length > 0 && <ul className="facts">{turn.facts.map((f) => <li key={f}>{f}</li>)}</ul>}
+          <p className="muted">{turn.worded === "summary" ? "Shown as computed from PitBox's data."
+            : turn.facts.length ? "The model was given these computed facts. Anything else in the answer is the model's own F1 knowledge and isn't checked."
+            : "PitBox has no data for this, so the answer is the model's own F1 knowledge. It isn't checked and may be out of date."}</p>
+        </details>
+      )}
       {turn.spec && (
         <details className="chat-meta">
           <summary>

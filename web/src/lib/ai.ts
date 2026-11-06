@@ -8,6 +8,9 @@ import { ROOMS_BASE } from "./roomProtocol";
  */
 export const CLOUD_MODEL = "cloud:workers-ai"; // the rooms server picks the actual model
 export const isCloud = (model: string | null | undefined) => !!model?.startsWith("cloud:");
+let lastCloudModel: string | null = null; // the model the rooms server actually used last
+/** How to name a model in the chat: the cloud one by the model that answered. */
+export const modelLabel = (model: string) => (isCloud(model) ? `${lastCloudModel ?? "Cloudflare Workers AI"}${lastCloudModel ? " on Cloudflare" : ""}` : model);
 // a deployed site has no /ollama proxy; asking would just fetch the app's own page
 const tryOllama = !import.meta.env.PROD || !!import.meta.env.VITE_OLLAMA;
 
@@ -58,6 +61,7 @@ export async function chat(opts: { model: string; system: string; user: string; 
     const body = await res.json().catch(() => ({}));
     if (res.status === 503) throw new AiUnavailable(body.error ?? "The AI model isn't available.");
     if (!res.ok) throw new Error(body.error ?? `The AI model returned an error (${res.status}).`);
+    if (body.model) lastCloudModel = String(body.model);
     return String(body.content ?? "");
   }
   const res = await fetch(`${OLLAMA}/api/chat`, {

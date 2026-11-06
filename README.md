@@ -40,6 +40,11 @@ Double-click `eval_ai.bat` to check the local model on questions with known answ
 - **Watch rooms** — share a code and watch together: a live session (race, sprint or qualifying: live timing tower, chat,
   race control, radio; no map, since live positions need F1 TV) or a replay (shared clock, map). Chat, react, and call
   the result (podium, fastest lap, safety car; pole and top three for qualifying).
-- **Team radio transcripts** — Whisper runs in the browser (free, on-device; about 80 MB downloaded once). Clips come
+- **Team radio transcripts** — Whisper runs in the browser (free, on-device; about 250 MB downloaded once). Clips come
   through the rooms worker because F1's file host doesn't allow browsers to read them.
-- **Ask PitBox** — a chat on every page (race pages talk about that race): plain-English questions and follow-ups become charts and answers computed from the data, and the AI's wording is checked against those numbers. Uses a local Ollama model if one is running (`ollama pull qwen2.5:7b`), otherwise a built-in reader.
+- **Ask PitBox** — a chat on every page that answers anything about F1. Questions about the race on screen become charts and answers computed from its timing data, and the AI's wording is checked against those numbers. Other questions (any season, Grand Prix, driver, team or record since 1950, rules, history) are answered by the AI with PitBox's own computed facts from `history/summary.json` and `careers.json` given to it; the chat shows which facts it used and says when an answer is the model's own knowledge. Uses a local Ollama model if one is running (`ollama pull qwen2.5:7b`), Cloudflare Workers AI when deployed, otherwise a built-in reader.
+
+## Licence
+The code is under the [MIT License](LICENSE). The race data in `data/public` comes from
+[OpenF1](https://openf1.org) and [Jolpica-F1](https://github.com/jolpica/jolpica-f1) and stays under their terms.
+PitBox isn't affiliated with Formula 1; F1 names and marks belong to their owners.

@@ -9,8 +9,8 @@ import { useModel } from "./AskPanel";
 import SearchBox from "./SearchBox";
 
 /**
- * One chat for the whole site. On a race page it talks about that race; anywhere else
- * it starts on the latest race and the race can be switched inside the chat. Each race
+ * One chat for the whole site. It answers anything about F1; questions about "this race"
+ * mean the race page you're on, or anywhere else the latest race (switchable in the chat). Each race
  * keeps its own conversation while the site is open.
  */
 type Ctx = { open: boolean; openChat: (q?: string, raceKey?: number) => void; close: () => void };
@@ -39,7 +39,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
 function examples(meta: Meta): string[] {
   const [a, b] = meta.result.slice(0, 2).map((r) => meta.drivers.find((d) => d.number === r.driver_number)?.code ?? "");
-  return ["Who won, and who led?", `${a} vs ${b} lap times`, `Tyre degradation for ${a} and ${b}`, "Did anyone retire?", "Who had the quickest pit stops?"];
+  return ["Who won, and who led?", `${a} vs ${b} lap times`, `Tyre degradation for ${a} and ${b}`, "Who has the most world titles?", "Who won the 2008 championship?", "What is DRS?"];
 }
 
 function GlobalChat({ open, close, openChat, pending, clearPending, chosen, setChosen }: {
@@ -80,7 +80,7 @@ function GlobalChat({ open, close, openChat, pending, clearPending, chosen, setC
   return (
     <>
       {!open && !inRoom && races.length > 0 && (
-        <button className="chat-fab" onClick={() => openChat()} aria-label="Ask PitBox about a race">
+        <button className="chat-fab" onClick={() => openChat()} aria-label="Ask PitBox about F1">
           <span aria-hidden="true">💬</span> Ask PitBox
         </button>
       )}
